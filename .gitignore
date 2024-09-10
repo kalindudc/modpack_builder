@@ -1,0 +1,6 @@
+build/*
+builder_versions/*
+modpack/*
+modpack_versions/*
+modpack_server/*
+THINGS_TO_CHANGE
