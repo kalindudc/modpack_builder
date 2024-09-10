@@ -48,7 +48,7 @@ def main():
 
 def create_new_builder_version():
   print ("Creating new builder version...")
-  zip_name = f"big_modpack_builder_{MODPACK_VERSION}.zip"
+  zip_name = f"modpack_builder_{MODPACK_VERSION}.zip"
   pack(BUILD_DIR, zip_name, MODPACK_BUILDER_VERSIONS_DIR)
 
 def update_modpack_version():
