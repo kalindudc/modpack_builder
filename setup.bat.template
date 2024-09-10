@@ -1,0 +1,75 @@
+@echo off
+setlocal enableDelayedExpansion
+
+:: Define variables
+set "instanceName=$modpack_name"
+set "version=$modpack_version"
+
+set "instanceDir=%appdata%\.minecraft\instances\%instanceName%-%version%"
+set "modpackLocation=.\modpack.zip"
+
+set "profileVersionID=$profile_version_id"
+set "profileVersionsDir=%appdata%\.minecraft\versions\%profileVersionID%"
+set "modpackProfileVersionLocation=.\profile_version.zip"
+
+set "minecraftLauncherProfilePath=%appdata%\.minecraft\launcher_profiles.json"
+
+:: Create the custom instance directory
+if not exist "%instanceDir%" (
+    mkdir "%instanceDir%"
+    echo Created directory: %instanceDir%
+)
+
+:: Download and extract modpack into the custom instance directory
+echo Extracting modpack...
+powershell -Command "Expand-Archive -Path '%modpackLocation%' -DestinationPath '%instanceDir%' -Force"
+
+echo Extracting profile version...
+powershell -Command "Expand-Archive -Path '%modpackProfileVersionLocation%' -DestinationPath '%profileVersionsDir%' -Force"
+
+:: Add new profile to launcher_profiles.json
+
+:: Backup the original JSON file
+copy "%minecraftLauncherProfilePath%" "%minecraftLauncherProfilePath%.bak"
+
+:: Prepare the new profile data
+set "profileName=%instanceName%-%version%"
+set "gameDir=!instanceDir:\=\\!"
+set profileData={ ^
+    "name": "%profileName%", ^
+    "lastVersionId": "%profileVersionID%", ^
+    "type": "custom", ^
+    "created": "2024-09-02T00:00:00.000Z", ^
+    "javaArgs" : "-Xmx8G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M", ^
+    "lastUsed": "2024-09-02T00:00:00.000Z", ^
+    "icon": "Glazed_Terracotta_White", ^
+    "gameDir": "%gameDir%" ^
+},
+
+:: Check if the profile already exists
+findstr /C:"\"%profileName%\"" "%minecraftLauncherProfilePath%" >nul
+if %errorlevel% == 0 (
+    echo Profile already exists.
+    goto :end
+)
+
+:: Insert the new profile into the JSON file
+(
+    for /F "tokens=1* delims=" %%a in (%minecraftLauncherProfilePath%) do (
+        echo %%a | findstr /c:"profiles" >nul
+        if not errorlevel 1 (
+            echo %%a
+            echo     "!profileName!": !profileData!
+        ) else (
+            echo %%a
+        )
+    )
+) > "%minecraftLauncherProfilePath%.tmp"
+
+:: Replace the original JSON file with the updated file
+move /Y "%minecraftLauncherProfilePath%.tmp" "%minecraftLauncherProfilePath%"
+
+echo Profile created successfully! Please restart the minecraft laucher to view the new %profileName% profile...
+:end
+endlocal
+pause
