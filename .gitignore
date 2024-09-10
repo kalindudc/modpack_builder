@@ -1,6 +1,7 @@
 build/*
 builder_versions/*
 modpack/*
-modpack_versions/*
+modpack_profile_version/*
 modpack_server/*
+server_tester/
 THINGS_TO_CHANGE
