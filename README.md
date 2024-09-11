@@ -2,6 +2,9 @@
 
 This repository contains scripts and template required to building and versioning your modpacks.
 
+### Who is this for?
+If you are building a private modpack or do not want to use CurseForge or Modrinth as modpack clients then this repo is for you.
+
 ### How to use this repo?
 
 ```
